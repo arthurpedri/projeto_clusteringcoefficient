@@ -5,7 +5,7 @@
 
 int main(void) {
     FILE *entrada = stdin;
-    le_grafo(entrada);
-
+    grafo g = le_grafo(entrada);
+    destroi_grafo(g);
     return 0;
 }

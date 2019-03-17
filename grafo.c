@@ -7,11 +7,12 @@
 struct grafo{
   char *nome;
   int tamanho;
+  char _COMPILER_PADDING[4];
   struct vertice *vertices; //head da lista
 };
 
 typedef struct aresta{
-    struct aresta *proximo;
+    struct aresta *prox;
     vertice vizinho;
 }aresta;
 
@@ -61,18 +62,47 @@ grafo le_grafo(FILE *input){
   while(fscanf(input, "%s%c", token, &separador) > 0){
     vertice v1 = adc_vetice(token, novo_grafo);
     if(separador == ' '){
+    // se tem mais de uma string na linhas adc aresta
       fscanf(input, "%s%c", token, &separador);
       vertice v2 = adc_vetice(token, novo_grafo);
       aresta *aux = malloc(sizeof(struct aresta));
-      aux->proximo = v1->lista;
+      aux->prox = v1->lista;
       aux->vizinho = v2;
       v1->lista = aux;
       aux = malloc(sizeof(struct aresta));
-      aux->proximo = v2->lista;
+      aux->prox = v2->lista;
       v2->lista = aux;
       aux->vizinho = v1;
     }
   }
   return(novo_grafo);
 
+}
+int destroi_grafo(grafo g){
+    if (g == NULL) {
+        return(0);
+    }
+
+    vertice v = g->vertices;
+    vertice vprox = v->prox;
+    //libera vertices
+    while (v != NULL) {
+        aresta *a = v->lista;
+        aresta *aprox = a->prox;
+        //libera arestas
+        while (a != NULL) {
+            free(a);
+            a = aprox;
+            if (aprox != NULL)
+                aprox = a->prox;
+        };
+        free(v->nome);
+        free(v);
+        v = vprox;
+        if (vprox != NULL)
+            vprox = v->prox;
+    }
+    //libera grafo
+    free(g);
+    return(0);
 }
