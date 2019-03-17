@@ -65,6 +65,7 @@ grafo le_grafo(FILE *input){
     // se tem mais de uma string na linhas adc aresta
       fscanf(input, "%s%c", token, &separador);
       vertice v2 = adc_vetice(token, novo_grafo);
+
       aresta *aux = malloc(sizeof(struct aresta));
       aux->prox = v1->lista;
       aux->vizinho = v2;
@@ -84,25 +85,72 @@ int destroi_grafo(grafo g){
     }
 
     vertice v = g->vertices;
-    vertice vprox = v->prox;
+    vertice vprox = NULL;
+    if (v != NULL)
+        vprox = v->prox;
     //libera vertices
     while (v != NULL) {
         aresta *a = v->lista;
-        aresta *aprox = a->prox;
+        aresta *aprox = NULL;
+        if (a != NULL)
+            aprox = a->prox;
         //libera arestas
         while (a != NULL) {
             free(a);
             a = aprox;
-            if (aprox != NULL)
+            if (a != NULL)
                 aprox = a->prox;
         };
         free(v->nome);
         free(v);
         v = vprox;
-        if (vprox != NULL)
+        if (v != NULL)
             vprox = v->prox;
     }
     //libera grafo
     free(g);
+    return(0);
+}
+
+grafo escreve_grafo(FILE *output, grafo g){
+    if (g == NULL) {
+        return(NULL);
+    }
+
+    fprintf(output,"graph %s:\n", g->nome);
+    vertice v = g->vertices;
+    vertice vprox = NULL;
+    if (v != NULL)
+        vprox = v->prox;
+    //print vertices
+    while (v != NULL) {
+        fprintf(output, "\t%s:\n\t\t",v->nome);
+        aresta *a = v->lista;
+        aresta *aprox = NULL;
+        if (a != NULL)
+            aprox = a->prox;
+        //print arestas
+        while (a != NULL) {
+            fprintf(output, " '%s'", a->vizinho->nome );
+            a = aprox;
+            if (a != NULL)
+                aprox = a->prox;
+        };
+        putchar(10);
+        v = vprox;
+        if (v != NULL)
+            vprox = v->prox;
+    }
+    return(g);
+}
+
+double coeficiente_agrupamento_grafo(grafo g){
+
+
+
+
+
+
+
     return(0);
 }
