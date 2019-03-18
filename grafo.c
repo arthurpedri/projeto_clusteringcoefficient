@@ -1,5 +1,5 @@
 /*  Trabalho de implementação 1 - Grafos 2019/1
- *  Autores: Arthur Pedri Trevisol - apt14 GRR2014
+ *  Autores: Arthur Pedri Trevisol - apt14 GRR20141784
  *           Sayuri Morikane Ribeiro - smr17 GRR20175881
  *  Professor: Renato Carmo
  *
@@ -129,8 +129,8 @@ grafo le_grafo(FILE *input){
 
 /*  int destroi_grafo(grafo g);
  *  Desaloca toda memória usada pela estrutura do grafo (vertices, arestas, nomes)
- *  Valor de retorno: 0, se o grafo é nulo
- *                    1, se o grafo foi desalocado.
+ *  Valor de retorno: 0, se o grafo foi desalocado
+ *                    1, se o grafo é nulo
  *
  */
 int destroi_grafo(grafo g){
@@ -202,7 +202,7 @@ grafo escreve_grafo(FILE *output, grafo g){
             a->visitado = 0;
             aresta_duplicada->visitado =0;
           }
-            a = aprox;            
+            a = aprox;
         };
         v = vprox;
     }
