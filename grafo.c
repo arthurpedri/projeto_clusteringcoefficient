@@ -1,3 +1,9 @@
+/*  Trabalho de implementação 1 - Grafos 2019/1
+ *  Autores: Arthur Pedri Trevisol - apt14 GRR2014
+ *           Sayuri Morikane Ribeiro - smr17 GRR20175881
+ *  Professor: Renato Carmo
+ *
+ */
 #define _GNU_SOURCE
 
 #include "grafo.h"
@@ -7,12 +13,14 @@
 struct grafo{
   char *nome;
   int tamanho;
-  char _COMPILER_PADDING[4];
-  struct vertice *vertices; //head da lista
+  char _COMPILER_PADDING[4]; // padding para alinhamento na memória
+  struct vertice *vertices; //lista de vertices do grafo
 };
 
 typedef struct aresta{
     struct aresta *prox;
+    int visitado;
+    char _COMPILER_PADDING[4];
     vertice vizinho;
 }aresta;
 
@@ -24,8 +32,14 @@ struct vertice{
 
 vertice adc_vetice(char* nome, grafo g);
 int agrupamento(vertice v, int *triades_totais);
-int busca_aresta(vertice v, char *nome);
+aresta *busca_aresta(vertice v, char *nome);
 
+/*  vertice adc_vetice(char* nome, grafo g);
+ *  Adiciona um vértice na lista de vértices do grafo.
+ *  Percorre checando se o vértice já existe.
+ *  Valor de retorno: endereço do vértice existente ou inserido.
+ *
+ */
 vertice adc_vetice(char* nome, grafo g){
     size_t nome_size = strlen(nome);
     if (nome == NULL || nome_size == 0) {
@@ -48,18 +62,32 @@ vertice adc_vetice(char* nome, grafo g){
     }
     return(novo_vertice);
 }
-//retorna 1 se achou, 0 se não achou
-int busca_aresta(vertice v, char *nome){
+
+/*  aresta *busca_aresta(vertice v, char *nome);
+ *  Busca na lista de arestas de um vértice um vizinho pelo nome.
+ *
+ *  Valor de retorno: Endereço da aresta, se existe um vizinho com o nome passado por parametro.
+ *                    NULL, se não existe vizinho com o nome passado por parametro.
+ *
+ */
+aresta *busca_aresta(vertice v, char *nome){
     aresta *a = v->lista;
     while (a != NULL) {
         if (strcmp(nome, a->vizinho->nome) == 0 ) {
-            return(1);
+            return(a);
         }
         a = a->prox;
     }
-    return(0);
+    return(NULL);
 }
 
+/*  grafo le_grafo(FILE *input);
+ *  Lê o grafo de um arquivo FILE *.
+ *  um grafo é um arquivo onde cada linha tem zero, uma ou duas
+ *  strings (sequência de caracteres sem "whitespace").
+ *  Valor de retorno: Endereço do grafo gerado pelo arquivo input.
+ *
+ */
 grafo le_grafo(FILE *input){
   grafo novo_grafo = NULL;
   char token[1025];
@@ -72,21 +100,25 @@ grafo le_grafo(FILE *input){
   novo_grafo->nome= NULL;
   novo_grafo->tamanho = 0;
 
-  //lê linhas pegando os token=palavras
+  // lê palavras
   while(fscanf(input, "%s%c", token, &separador) > 0){
+    /* se está separado por whitespace é aresta
+    *  senão não é vertice
+    */
     vertice v1 = adc_vetice(token, novo_grafo);
     if(separador == ' '){
-    // se tem mais de uma string na linhas adc aresta
       fscanf(input, "%s%c", token, &separador);
       vertice v2 = adc_vetice(token, novo_grafo);
-      if(!(busca_aresta(v1, token))){
+      if((busca_aresta(v1, token)) == NULL){
           aresta *aux = malloc(sizeof(struct aresta));
           aux->prox = v1->lista;
           aux->vizinho = v2;
+          aux->visitado = 0;
           v1->lista = aux;
           aux = malloc(sizeof(struct aresta));
           aux->prox = v2->lista;
           v2->lista = aux;
+          aux->visitado = 0;
           aux->vizinho = v1;
       }
     }
@@ -95,9 +127,15 @@ grafo le_grafo(FILE *input){
 
 }
 
+/*  int destroi_grafo(grafo g);
+ *  Desaloca toda memória usada pela estrutura do grafo (vertices, arestas, nomes)
+ *  Valor de retorno: 0, se o grafo é nulo
+ *                    1, se o grafo foi desalocado.
+ *
+ */
 int destroi_grafo(grafo g){
     if (g == NULL) {
-        return(0);
+        return(1);
     }
 
     vertice v = g->vertices;
@@ -128,38 +166,54 @@ int destroi_grafo(grafo g){
     return(0);
 }
 
+/*  grafo escreve_grafo(FILE *output, grafo g);
+ *  Escreve o grafo g no mesmo formato de entrada no FILE * passado por parâmetro.
+ *  Valor de retorno: Nulo, se o grafo for nulo
+ *                    Endereço do grafo que foi escrito, se o grafo não for nulo.
+ *
+ */
 grafo escreve_grafo(FILE *output, grafo g){
     if (g == NULL) {
         return(NULL);
     }
 
-    fprintf(output,"graph %s:\n", g->nome);
+    // fprintf(output,"graph %s:\n", g->nome);
     vertice v = g->vertices;
     vertice vprox = NULL;
-    if (v != NULL)
-        vprox = v->prox;
-    //print vertices
     while (v != NULL) {
-        fprintf(output, "\t%s:",v->nome);
+        vprox = v->prox;
+
         aresta *a = v->lista;
         aresta *aprox = NULL;
-        if (a != NULL)
-            aprox = a->prox;
+        if (a == NULL){ // Se o vertice não tem arestas
+          fprintf(output, "%s\n",v->nome);
+        }
+
         //print arestas
         while (a != NULL) {
-            fprintf(output, " '%s'", a->vizinho->nome );
-            a = aprox;
-            if (a != NULL)
-                aprox = a->prox;
+          aprox = a->prox;
+          aresta *aresta_duplicada = busca_aresta(a->vizinho, v->nome);
+          if ((a->visitado == 0)&&(aresta_duplicada->visitado == 0)) {
+            a->visitado = 1;
+            fprintf(output, "%s",v->nome);
+            fprintf(output, " %s\n", a->vizinho->nome );
+          }
+          else if((a->visitado == 1)&&(aresta_duplicada->visitado == 1)){
+            a->visitado = 0;
+            aresta_duplicada->visitado =0;
+          }
+            a = aprox;            
         };
-        putchar(10);
         v = vprox;
-        if (v != NULL)
-            vprox = v->prox;
     }
     return(g);
 }
 
+/*  int agrupamento(vertice v, int *triades_totais);
+ *  Conta o coeficiente de agrupamento de um vertice para todos os seus vizinhos.
+ *  Valor de retorno: Quantidade de tríades fechadas contendo o vértice passado.
+ *
+ */
 int agrupamento(vertice v, int *triades_totais){
   int fechadas = 0;
   if (v->lista == NULL) {
@@ -178,8 +232,7 @@ int agrupamento(vertice v, int *triades_totais){
 
       *triades_totais+=1;
 
-      //printf("v %s v1 %s v2 %s\n",v->nome, v1->nome, v2->nome);
-      if(busca_aresta(v2, v1->nome)){
+      if(busca_aresta(v2, v1->nome) != NULL){
         fechadas++;
       }
       vizinhos = vizinhos->prox;
@@ -192,9 +245,12 @@ int agrupamento(vertice v, int *triades_totais){
   return(fechadas);
 }
 
-
+/*  double coeficiente_agrupamento_grafo(grafo g);
+ *  Calcula o coeficiente de agrupamento do grafo.
+ *  Valor de retorno: Coeficiente de Agrupamento do grafo = triades_fechadas/triades_totais.
+ *
+ */
 double coeficiente_agrupamento_grafo(grafo g){
-// trios fechados / total
     int triades = 0;
     int t_fechadas = 0;
     double coeficiente = 0;
@@ -205,6 +261,5 @@ double coeficiente_agrupamento_grafo(grafo g){
     if (triades)
       coeficiente = (double) t_fechadas / (double) triades;
 
-    //printf("fechadas %d total %d\nCoeficiente de agrupamento: %f\n", t_fechadas, triades, coeficiente);
     return(coeficiente);
 }
