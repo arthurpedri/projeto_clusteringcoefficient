@@ -168,7 +168,7 @@ int agrupamento(vertice v, int *triades_totais){
   vertice v1 = v->lista->vizinho; // aresta (A, B)
   aresta *vizinhos = v->lista->prox;
   while(vizinhos != NULL){
-    *triades_totais++;
+    *triades_totais+=1;
     vertice v2 = vizinhos->vizinho;// ponto C vai ser um já vizinho de A
     if(busca_aresta(v2, v1->nome)){
       fechadas++;
@@ -180,12 +180,17 @@ int agrupamento(vertice v, int *triades_totais){
 }
 
 double coeficiente_agrupamento_grafo(grafo g){
-// 3* nro de triangulos /nro de trios
+// trios fechados / total
     int triades = 1;
     int t_fechadas = 0;
+    double coeficiente = 0;
     for(vertice v = g->vertices; v != NULL; v = v->prox){
       t_fechadas += agrupamento(v, &triades);
     }
-    printf("fechadas %d total %d\n", t_fechadas, triades);
-    return(0);
+
+    if (triades)
+      coeficiente = (double) t_fechadas / (double) triades;
+
+    printf("fechadas %d total %d\nCoeficiente de agrupamento: %f\n", t_fechadas, triades, coeficiente);
+    return(coeficiente);
 }
