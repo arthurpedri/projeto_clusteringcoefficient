@@ -23,7 +23,7 @@ struct vertice{
 };
 
 vertice adc_vetice(char* nome, grafo g);
-
+int agrupamento(vertice v, int *triades_totais);
 int busca_aresta(vertice v, char *nome);
 
 vertice adc_vetice(char* nome, grafo g){
@@ -46,7 +46,6 @@ vertice adc_vetice(char* nome, grafo g){
         g->vertices = novo_vertice;
         novo_vertice->lista = NULL;
     }
-    printf("%s\n",nome );
     return(novo_vertice);
 }
 //retorna 1 se achou, 0 se não achou
@@ -60,6 +59,7 @@ int busca_aresta(vertice v, char *nome){
     }
     return(0);
 }
+
 grafo le_grafo(FILE *input){
   grafo novo_grafo = NULL;
   char token[1025];
@@ -94,6 +94,7 @@ grafo le_grafo(FILE *input){
   return(novo_grafo);
 
 }
+
 int destroi_grafo(grafo g){
     if (g == NULL) {
         return(0);
@@ -159,16 +160,32 @@ grafo escreve_grafo(FILE *output, grafo g){
     return(g);
 }
 
+int agrupamento(vertice v, int *triades_totais){
+  int fechadas = 0;
+  if (v->lista == NULL) {
+    return(0);
+  }
+  vertice v1 = v->lista->vizinho; // aresta (A, B)
+  aresta *vizinhos = v->lista->prox;
+  while(vizinhos != NULL){
+    *triades_totais++;
+    vertice v2 = vizinhos->vizinho;// ponto C vai ser um já vizinho de A
+    if(busca_aresta(v2, v1->nome)){
+      fechadas++;
+    }
+    vizinhos = vizinhos->prox;
+    v1 = v1->prox;
+  }
+  return(fechadas);
+}
+
 double coeficiente_agrupamento_grafo(grafo g){
 // 3* nro de triangulos /nro de trios
-    int t_abertas = 1;
+    int triades = 1;
     int t_fechadas = 0;
-    
-
-
-
-
-
-
+    for(vertice v = g->vertices; v != NULL; v = v->prox){
+      t_fechadas += agrupamento(v, &triades);
+    }
+    printf("fechadas %d total %d\n", t_fechadas, triades);
     return(0);
 }
