@@ -10,11 +10,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct grafo{
+struct _grafo{
   char *nome;
   int tamanho;
   char _COMPILER_PADDING[4]; // padding para alinhamento na memória
-  struct vertice *vertices; //lista de vertices do grafo
+  struct _vertice *vertices; //lista de vertices do grafo
 };
 
 typedef struct aresta{
@@ -24,10 +24,10 @@ typedef struct aresta{
     vertice vizinho;
 }aresta;
 
-struct vertice{
+struct _vertice{
   char *nome;
   struct aresta *lista;
-  struct vertice *prox;
+  struct _vertice *prox;
 };
 
 vertice adc_vetice(char* nome, grafo g);
@@ -53,7 +53,7 @@ vertice adc_vetice(char* nome, grafo g){
         }
     }
     if(novo_vertice == NULL){
-        novo_vertice = (vertice) malloc(sizeof(struct vertice));
+        novo_vertice = (vertice) malloc(sizeof(struct _vertice));
         novo_vertice->nome = (char *) malloc(sizeof(char)*(nome_size+1));
         strncpy(novo_vertice->nome, nome, nome_size+1);
         novo_vertice->prox = g->vertices;
@@ -95,7 +95,7 @@ grafo le_grafo(FILE *input){
   if (input == NULL) {
       return(NULL);
   }
-  novo_grafo =(grafo) malloc(sizeof(struct grafo));
+  novo_grafo =(grafo) malloc(sizeof(struct _grafo));
   novo_grafo->vertices = NULL;
   novo_grafo->nome= NULL;
   novo_grafo->tamanho = 0;
