@@ -28,6 +28,8 @@ struct _vertice{
   char *nome;
   struct aresta *lista;
   struct _vertice *prox;
+  int grau;
+  char _COMPILER_PADDING[4];
 };
 
 vertice adc_vetice(char* nome, grafo g);
@@ -45,22 +47,57 @@ vertice adc_vetice(char* nome, grafo g){
     if (nome == NULL || nome_size == 0) {
         return NULL;
     }
-    vertice novo_vertice = NULL;
-    g->tamanho++;
-    for (vertice i = g->vertices; i != NULL; i = i->prox) {
-        if (strcmp(nome, i->nome) == 0) {
-            novo_vertice = i;
-        }
-    }
+    vertice novo_vertice = vertice_nome(g, nome);
     if(novo_vertice == NULL){
         novo_vertice = (vertice) malloc(sizeof(struct _vertice));
         novo_vertice->nome = (char *) malloc(sizeof(char)*(nome_size+1));
         strncpy(novo_vertice->nome, nome, nome_size+1);
         novo_vertice->prox = g->vertices;
         g->vertices = novo_vertice;
+        g->tamanho++;
+        novo_vertice->grau = 0;
         novo_vertice->lista = NULL;
     }
     return(novo_vertice);
+}
+
+/*
+ * Retorna o nome do vertice v
+ */
+char *nome(vertice v){
+  return(v->nome);
+}
+
+/*
+ *  devolve o número de vértices de g
+ */
+unsigned int n_vertices(grafo g){
+  return((unsigned int)g->tamanho);
+}
+
+/*
+ * devolve o número de arestas de g
+ */
+unsigned int n_arestas(grafo g){
+  int soma = 0;
+  for (vertice i = g->vertices; i != NULL ; i = i->prox) {
+    soma = soma + i->grau;
+  }
+  return((unsigned int)(soma/2));
+}
+
+/*
+ * Retorna o ponteiro para o vértice com esse nome no grafo g
+ * Se o vértice nao existir retorna NULL
+ */
+vertice vertice_nome(grafo g, char *nome){
+  vertice novo_vertice = NULL;
+  for (vertice i = g->vertices; i != NULL; i = i->prox) {
+      if (strcmp(nome, i->nome) == 0) {
+          novo_vertice = i;
+      }
+  }
+  return(novo_vertice);
 }
 
 /*  aresta *busca_aresta(vertice v, char *nome);
@@ -115,9 +152,11 @@ grafo le_grafo(FILE *input){
           aux->vizinho = v2;
           aux->visitado = 0;
           v1->lista = aux;
+          v1->grau++;
           aux = malloc(sizeof(struct aresta));
           aux->prox = v2->lista;
           v2->lista = aux;
+          v2->grau++;
           aux->visitado = 0;
           aux->vizinho = v1;
       }
@@ -262,4 +301,30 @@ double coeficiente_agrupamento_grafo(grafo g){
       coeficiente = (double) t_fechadas / (double) triades;
 
     return(coeficiente);
+}
+
+/*
+ *devolve o número mínimo k de trilhas necessárias para cobrir o grafo g
+ *
+*observe que
+*
+*  k = 1, se g é euleriano, ou
+*  k = (número de vértices de grau ímpar em g)/2, caso contrário
+*
+*aloca e preenche o vetor cobertura de maneira que cobertura[i] contém uma
+*trilha em G para cada 0 <= i < k.
+*
+*cada trilha é um sequência de vertices terminada por NULL, isto é, para cada 0 <= i < k
+*a sequência
+*
+*    (cobertura[i][0], cobertura[i][1], ..., cobertura[i][l-1], cobertura[i][l])
+*
+*é tal que
+*
+*    1. cobertura[i][j] é um vertice, para cada 0 <= j < l,
+*    2. cobertura[i][l] == NULL, e
+*    3. cobertura[i][j-1] é vizinho de cobertura[i][j] em g, para cada 0 < j < l
+*/
+unsigned int cobertura_por_trilhas(grafo g, vertice **cobertura[]){
+
 }
