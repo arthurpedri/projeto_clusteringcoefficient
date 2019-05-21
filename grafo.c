@@ -304,27 +304,59 @@ double coeficiente_agrupamento_grafo(grafo g){
 }
 
 /*
+ * Conta quantidade de vértices com grau ímpar
+ *
+ */
+int vertices_impares(grafo g){
+  int impares = 0;
+  for (vertice i = g->vertices ; i !=NULL ; i= i->prox) {
+    if ((i->grau % 2)!= 0 ) {
+      impares++;
+    }
+  }
+  return(impares/2);
+}
+
+/*
+ * Checa se o grafo g é euclidiano, ou seja,
+ *tem um ciclo que contém todas as suas arestas
+ * Retorna 1 se o grafo é euclidiano ou 0 se o grafo não é euclidiano;
+ */
+int grafo_euclidiano(grafo g){
+  return(0);
+  //Completar. como fazer?
+}
+
+/*
  *devolve o número mínimo k de trilhas necessárias para cobrir o grafo g
  *
-*observe que
-*
-*  k = 1, se g é euleriano, ou
-*  k = (número de vértices de grau ímpar em g)/2, caso contrário
-*
-*aloca e preenche o vetor cobertura de maneira que cobertura[i] contém uma
-*trilha em G para cada 0 <= i < k.
-*
-*cada trilha é um sequência de vertices terminada por NULL, isto é, para cada 0 <= i < k
-*a sequência
-*
-*    (cobertura[i][0], cobertura[i][1], ..., cobertura[i][l-1], cobertura[i][l])
-*
-*é tal que
-*
-*    1. cobertura[i][j] é um vertice, para cada 0 <= j < l,
-*    2. cobertura[i][l] == NULL, e
-*    3. cobertura[i][j-1] é vizinho de cobertura[i][j] em g, para cada 0 < j < l
-*/
+ *observe que
+ *  k = 1, se g é euleriano, ou
+ *  k = (número de vértices de grau ímpar em g)/2, caso contrário
+ *
+ *aloca e preenche o vetor cobertura de maneira que cobertura[i] contém uma
+ *trilha em G para cada 0 <= i < k.
+ *
+ *cada trilha é um sequência de vertices terminada por NULL, isto é, para cada 0 <= i < k
+ *a sequência
+ *
+ *    (cobertura[i][0], cobertura[i][1], ..., cobertura[i][l-1], cobertura[i][l])
+ *
+ *é tal que
+ *
+ *    1. cobertura[i][j] é um vertice, para cada 0 <= j < l,
+ *    2. cobertura[i][l] == NULL, e
+ *    3. cobertura[i][j-1] é vizinho de cobertura[i][j] em g, para cada 0 < j < l
+ */
 unsigned int cobertura_por_trilhas(grafo g, vertice **cobertura[]){
+  int k = grafo_euclidiano(g);
+  if (!k) {
+    k = vertices_impares(g);
+  }
+  cobertura = (vertice *) malloc(k * sizeof(vertice));
+  for (int i = 0; i < k; i++) {
+    // cobertura[i] = ??
+  }
+
 
 }
