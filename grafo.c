@@ -32,17 +32,21 @@ struct _vertice{
   char _COMPILER_PADDING[4];
 };
 
-vertice adc_vetice(char* nome, grafo g);
+vertice adc_vertice(char* nome, grafo g);
 int agrupamento(vertice v, int *triades_totais);
 aresta *busca_aresta(vertice v, char *nome);
+int vertices_impares(grafo g);
+vertice encontra_trilha(grafo g, vertice r);
+aresta *remove_aresta(vertice v1, aresta *v2);
+void rm_vertice(vertice v, grafo g);
 
-/*  vertice adc_vetice(char* nome, grafo g);
+/*  vertice adc_vertice(char* nome, grafo g);
  *  Adiciona um vértice na lista de vértices do grafo.
  *  Percorre checando se o vértice já existe.
  *  Valor de retorno: endereço do vértice existente ou inserido.
  *
  */
-vertice adc_vetice(char* nome, grafo g){
+vertice adc_vertice(char* nome, grafo g){
     size_t nome_size = strlen(nome);
     if (nome == NULL || nome_size == 0) {
         return NULL;
@@ -61,6 +65,30 @@ vertice adc_vetice(char* nome, grafo g){
     return(novo_vertice);
 }
 
+void rm_vertice(vertice v, grafo g){
+  aresta *v2;
+  for (aresta *i = v->lista; i != NULL; i = i->prox) {
+    v2 = i->vizinho->lista;
+    v2->vizinho->lista = remove_aresta(v, v2); //remove a aresta em v2
+    v->lista = i->prox;
+    }
+
+}
+
+aresta *remove_aresta(vertice v1, aresta *v2){
+  if (v2 == NULL) {
+    return(NULL);
+  }
+  if (v2->vizinho == v1) {
+    aresta *aux = v2->prox;
+    free(v2);
+    return(aux);
+  }
+  else{
+    v2->prox = remove_aresta(v1, v2->prox);
+    return(v2);
+  }
+}
 /*
  * Retorna o nome do vertice v
  */
@@ -142,10 +170,10 @@ grafo le_grafo(FILE *input){
     /* se está separado por whitespace é aresta
     *  senão não é vertice
     */
-    vertice v1 = adc_vetice(token, novo_grafo);
+    vertice v1 = adc_vertice(token, novo_grafo);
     if(separador == ' '){
       fscanf(input, "%s%c", token, &separador);
-      vertice v2 = adc_vetice(token, novo_grafo);
+      vertice v2 = adc_vertice(token, novo_grafo);
       if((busca_aresta(v1, token)) == NULL){
           aresta *aux = malloc(sizeof(struct aresta));
           aux->prox = v1->lista;
@@ -165,6 +193,7 @@ grafo le_grafo(FILE *input){
   return(novo_grafo);
 
 }
+
 
 /*  int destroi_grafo(grafo g);
  *  Desaloca toda memória usada pela estrutura do grafo (vertices, arestas, nomes)
@@ -317,14 +346,23 @@ int vertices_impares(grafo g){
   return(impares/2);
 }
 
-/*
- * Checa se o grafo g é euclidiano, ou seja,
- *tem um ciclo que contém todas as suas arestas
- * Retorna 1 se o grafo é euclidiano ou 0 se o grafo não é euclidiano;
- */
-int grafo_euclidiano(grafo g){
-  return(0);
-  //Completar. como fazer?
+vertice encontra_trilha(grafo g, vertice r){
+  aresta *v = r->lista;
+  vertice lista_v = NULL;
+  while (v != NULL) {
+    //busca proximo vertice por ordem alfabética
+    for (aresta *i = v->prox; i != NULL; i = i->prox) {
+      if (strcmp(v->vizinho->nome, i->vizinho->nome) > 0){ // v maior que i
+        v = i;
+      }
+    }
+    if((void *)v == (void *)r){ // fez um ciclo voltou a r
+      return (lista_v);
+    }
+    //senão adc o vértice na lista_v da trilha E MARCA ELE COMO VISITADO ##### LEmbrar de desmarcar no final da função
+    //podemos fazer também uma função de remover o vertice de g pra adc ele na lista ou copiamos ele aí nao precisa do visitados
+  }
+  return(NULL);
 }
 
 /*
@@ -349,14 +387,38 @@ int grafo_euclidiano(grafo g){
  *    3. cobertura[i][j-1] é vizinho de cobertura[i][j] em g, para cada 0 < j < l
  */
 unsigned int cobertura_por_trilhas(grafo g, vertice **cobertura[]){
-  int k = grafo_euclidiano(g);
-  if (!k) {
-    k = vertices_impares(g);
+  int k = vertices_impares(g);
+  if (k != 0) {
+    k = 1;
   }
-  cobertura = (vertice *) malloc(k * sizeof(vertice));
+  else{ // adc o vértice e arestas com todos os vértices de grau ímpar
+    char nome_v = '\0'; // vertice novo para transformar em grafo euleriano
+    vertice v1 = adc_vertice(&nome_v,g);
+
+    for (vertice i = g->vertices ; i != NULL; i = i->prox) {
+        if ((i->grau % 2)!= 0 ) {  // Se for ímpar adc aresta
+          aresta *aux = malloc(sizeof(struct aresta));
+          aux->prox = v1->lista;
+          aux->vizinho = i;
+          aux->visitado = 0;
+          v1->lista = aux;
+          v1->grau++;
+          aux = malloc(sizeof(struct aresta));
+          aux->prox = i->lista;
+          i->lista = aux;
+          i->grau++;
+          aux->visitado = 0;
+          aux->vizinho = v1;
+        }
+    }
+  }
+  // AGORA achar as trilhas
+  cobertura = malloc(k * sizeof(vertice));
   for (int i = 0; i < k; i++) {
-    // cobertura[i] = ??
+    cobertura[i] = malloc(sizeof(vertice));
+
   }
 
 
+return(0);
 }
