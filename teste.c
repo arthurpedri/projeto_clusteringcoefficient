@@ -10,6 +10,7 @@ int main(void) {
     printf("arestas %d\n", n_arestas(g) );
     escreve_grafo(stdout, g);
     printf("novo grafo \n" );
+    escreve_grafo(stdout, g);
     destroi_grafo(g);
     return 0;
 }

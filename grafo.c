@@ -38,7 +38,6 @@ aresta *busca_aresta(vertice v, char *nome);
 int vertices_impares(grafo g);
 vertice encontra_trilha(grafo g, vertice r);
 aresta *remove_aresta(vertice v1, aresta *v2);
-void rm_vertice(vertice v, grafo g);
 
 /*  vertice adc_vertice(char* nome, grafo g);
  *  Adiciona um vértice na lista de vértices do grafo.
@@ -65,16 +64,7 @@ vertice adc_vertice(char* nome, grafo g){
     return(novo_vertice);
 }
 
-void rm_vertice(vertice v, grafo g){
-  aresta *v2;
-  for (aresta *i = v->lista; i != NULL; i = i->prox) {
-    v2 = i->vizinho->lista;
-    v2->vizinho->lista = remove_aresta(v, v2); //remove a aresta em v2
-    v->lista = i->prox;
-    }
-
-}
-
+// devolve ponteiro para aresta-prox
 aresta *remove_aresta(vertice v1, aresta *v2){
   if (v2 == NULL) {
     return(NULL);
@@ -266,7 +256,7 @@ grafo escreve_grafo(FILE *output, grafo g){
             fprintf(output, "%s",v->nome);
             fprintf(output, " %s\n", a->vizinho->nome );
           }
-          else if((a->visitado == 1)&&(aresta_duplicada->visitado == 1)){
+          else if((a->visitado == 1)||(aresta_duplicada->visitado == 1)){
             a->visitado = 0;
             aresta_duplicada->visitado =0;
           }
@@ -352,7 +342,7 @@ vertice encontra_trilha(grafo g, vertice r){
   while (v != NULL) {
     //busca proximo vertice por ordem alfabética
     for (aresta *i = v->prox; i != NULL; i = i->prox) {
-      if (strcmp(v->vizinho->nome, i->vizinho->nome) > 0){ // v maior que i
+      if (strcmp(v->vizinho->nome, i->vizinho->nome) > 0){ // v maior que i E != do pai.
         v = i;
       }
     }
