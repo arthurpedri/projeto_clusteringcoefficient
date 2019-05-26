@@ -28,7 +28,6 @@ typedef struct aresta{
 typedef struct listav{
     struct listav *prox;
     vertice vertice;
-    char _COMPILER_PADDING[4];
 }listav;
 
 struct _vertice{
@@ -45,7 +44,8 @@ aresta *busca_aresta(vertice v, char *nome);
 unsigned int vertices_impares(grafo g);
 aresta *remove_aresta(vertice v1, aresta *v2);
 void adc_na_trilha(listav *lista, vertice v);
-listav *encontra_ciclo(grafo g, vertice r);
+listav *encontra_ciclo(vertice r);
+listav *naLista(listav *u, listav *v);
 /*  vertice adc_vertice(char* nome, grafo g);
  *  Adiciona um vértice na lista de vértices do grafo.
  *  Percorre checando se o vértice já existe.
@@ -369,7 +369,6 @@ listav *naLista(listav *u, listav *v){
         }
     }
     return NULL;
-
 }
 
 /*
@@ -387,16 +386,14 @@ unsigned int vertices_impares(grafo g){
   return(impares/2);
 }
 
-listav *encontra_ciclo(grafo g, vertice r){
+listav *encontra_ciclo(vertice r){
   listav *ciclo = malloc(sizeof(struct listav));
   ciclo->vertice = r;
   ciclo->prox = NULL;
   vertice proximo = NULL;
-  //adc_na_trilha(ciclo, r);
+  // adc_na_trilha(ciclo, r);
   vertice pai = r;
 while (pai->lista != NULL) {
-
-
     proximo = pai->lista->vizinho; // primeiro vizinho do pai
     // acha prox vertice por ordem alfabética
     for (aresta *i = pai->lista->prox; i != NULL ; i = i->prox ) { // trocado r por pai
@@ -405,16 +402,10 @@ while (pai->lista != NULL) {
         proximo = i->vizinho;
       }
     }
-    //remove aresta
-    // printf("pai nome %s, grau %d\n", pai->nome, pai->grau);
-    // printf("prox nome %s, grau %d\n", proximo->nome, proximo->grau);
     pai->lista= remove_aresta(proximo, pai->lista);
     --pai->grau;
     proximo->lista = remove_aresta(pai, proximo->lista);
     --proximo->grau;
-
-
-    //copia vertice para a lista do ciclo
 
     adc_na_trilha(ciclo, proximo);
     pai = proximo;
@@ -426,7 +417,7 @@ while (pai->lista != NULL) {
 /*
  *devolve o número mínimo k de trilhas necessárias para cobrir o grafo g
  *
- *observe que
+ *observe queda forma que o Professor pediu
  *  k = 1, se g é euleriano, ou
  *  k = (número de vértices de grau ímpar em g)/2, caso contrário
  *
@@ -454,7 +445,14 @@ unsigned int cobertura_por_trilhas(grafo g, vertice **cobertura[]){
   char stringZero[2] = "0";
   if (k == 0) {
     k = 1;
-    trilhaPrincipal = encontra_ciclo(g, g->vertices);
+    vertice primeiro = g->vertices;
+    for (vertice vert = primeiro->prox; vert != NULL; vert = vert->prox) {
+      int compara = strcmp(primeiro->nome, vert->nome);// se >0 proximo > i->vizinho
+      if ((compara > 0) ) {
+        primeiro = vert;
+      }
+    }
+    trilhaPrincipal = encontra_ciclo(primeiro);
   }
   else{ // adc o vértice e arestas com todos os vértices de grau ímpar
     vertice v1 = adc_vertice(stringZero,g);
@@ -475,7 +473,7 @@ unsigned int cobertura_por_trilhas(grafo g, vertice **cobertura[]){
           nova_aresta->vizinho = v1;
         }
     }
-    trilhaPrincipal = encontra_ciclo(g, v1);
+    trilhaPrincipal = encontra_ciclo(v1);
 
 }
 
@@ -486,7 +484,7 @@ unsigned int cobertura_por_trilhas(grafo g, vertice **cobertura[]){
 
   for (vertice i = g->vertices ; i != NULL; i = i->prox) {
       if (i->grau > 0) {  // Se vertice ainda tiver arestas
-          cicloEncontrado = encontra_ciclo(g, i);
+          cicloEncontrado = encontra_ciclo(i);
           aux[trilhasExtras] = naLista(cicloEncontrado, trilhaPrincipal); // retorna vertice do encontra_ciclo em comum com trilhaPrincipal
           // printf("aux %s\n", aux[trilhasExtras]->vertice->nome);
           for (listav *p = cicloEncontrado ; p != NULL; p = p->prox) {
@@ -521,22 +519,6 @@ unsigned int cobertura_por_trilhas(grafo g, vertice **cobertura[]){
                   cicloA->prox= continuacao;
                   continuacao =cicloA;
               }
-
-              for(listav * teste = continuacao ; teste != NULL; teste = teste->prox){
-                printf("encontrado %s ,", teste->vertice->nome );
-              }
-
-              // for (listav *listaaux = ordena ; listaaux != NULL; listaaux = listaaux->prox) {
-              //     comum_principal->prox= ordena;
-              //     comum_principal = comum_principal->prox;
-              // }
-              // for (listav *listaaux = comum_principal->prox ; listaaux != NULL; listaaux = listaaux->prox) {
-              //     comum_principal= comum_principal->prox;
-              // }
-              // comum_principal->prox = cicloEncontrado->prox; // g
-              // while (strcmp(comum_principal->vertice->nome, aux[trilhasExtras]->vertice->nome) != 0) { // nao deve dar loop infinito, mas cuidado
-              //     comum_principal= comum_principal->prox;
-              // }
               comeco->prox = continuacao;
 
 
@@ -545,11 +527,8 @@ unsigned int cobertura_por_trilhas(grafo g, vertice **cobertura[]){
               aux[trilhasExtras] = cicloEncontrado; // se nao tem vertice em comum com trilhaPrincipal guarda nas trilhas extras e incrementa o contador
               trilhasExtras++;
           }
-
       }
-      else {
 
-      }
   }
    printf("\n" );
   for (listav *i = trilhaPrincipal ; i != NULL; i = i->prox) {
@@ -557,14 +536,10 @@ unsigned int cobertura_por_trilhas(grafo g, vertice **cobertura[]){
   }
   printf("\n" );
 
-
-
-
-  //while (trilhasExtras > k) {
-//      naLista(aux[trilhasExtras][0]->nome, trilhaPrincipal);
-  //}
-
-  // Passar trilhas para cobertura da forma que o Professor pediu
+  // Passar trilhas para cobertura[] ?!?!
+  // for (listav *cicloEuclidiano = trilhaPrincipal) {
+  //   /* code */
+  // }
 
   return(k);
 }

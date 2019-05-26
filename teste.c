@@ -9,12 +9,12 @@ int main(void) {
     vertice **cobertura[0];
     printf("vertices %d\n", n_vertices(g));
     printf("arestas %d\n", n_arestas(g) );
-    escreve_grafo(stdout, g);
+    // escreve_grafo(stdout, g);
     unsigned int a =  cobertura_por_trilhas( g, cobertura);
     printf("trilhas %u\n", a);
     printf("novo grafo \n" );
     escreve_grafo(stdout, g);
-    
+
     destroi_grafo(g);
     return 0;
 }
