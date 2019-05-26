@@ -438,7 +438,6 @@ while (pai->lista != NULL) {
 unsigned int cobertura_por_trilhas(grafo g, vertice **cobertura[]){
   unsigned int k = vertices_impares(g);
   listav **aux = malloc(sizeof(struct listav)*k*3);
-  *cobertura = malloc(sizeof(vertice**)*k);
   //listav aux[g->tamanho];
   listav *cicloEncontrado;
   int trilhasExtras = 0;
@@ -564,6 +563,8 @@ unsigned int cobertura_por_trilhas(grafo g, vertice **cobertura[]){
 //    }
 
 
+  cobertura = malloc(sizeof(vertice**)*k);
+  //  **cobertura = malloc(sizeof(vertice*)*k);
 
    printf("\n" );
    for (unsigned int linha = 0 ; linha < k; ++linha) {
@@ -571,23 +572,20 @@ unsigned int cobertura_por_trilhas(grafo g, vertice **cobertura[]){
        trilhaPrincipal = trilhaPrincipal->prox;
      }
      unsigned int coluna = 0;
-     listav *salva= trilhaPrincipal;
+     listav *salvo= trilhaPrincipal;
      while(trilhaPrincipal != NULL && (strcmp(trilhaPrincipal->vertice->nome, stringZero )!= 0 )){
        coluna++;
+       trilhaPrincipal = trilhaPrincipal->prox;
      }
-     *(cobertura[linha]) = (vertice*)malloc(sizeof(vertice)*(coluna+1));
-     for (unsigned int op = 0; op < coluna ; op++) {
-       *(cobertura[linha][op]) = salva->vertice;
-       salva= salva->prox;
-
+     (cobertura[linha]) = (vertice**)malloc(sizeof(vertice*)*(coluna+1));
+     for (unsigned int op = 0; op < coluna+1 ; op++) {
+       cobertura[linha][op] = (vertice*)malloc(sizeof(vertice));
+       *(cobertura[linha][op]) = salvo->vertice;
+       printf("cobertura %d %d %s\n",linha,op,((*cobertura[linha][op])->nome));
+       salvo= salvo->prox;
      }
-    //  while(trilhaPrincipal != NULL && (strcmp(trilhaPrincipal->vertice->nome, stringZero )!= 0 )){
-    //      coluna = 0;
-    //      *(cobertura[linha][coluna]) = trilhaPrincipal->vertice;
-    //      trilhaPrincipal = trilhaPrincipal->prox;
-    //      coluna++;
-    //    }
-    //   *(cobertura[linha][coluna]) = NULL;
+      cobertura[linha][coluna+1] = (vertice*)malloc(sizeof(vertice));
+     *(cobertura[linha][coluna+1]) = NULL;
      }
 
   for (listav *i = trilhaPrincipal ; i != NULL; i = i->prox) {
