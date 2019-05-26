@@ -14,7 +14,7 @@ int main(void) {
     printf("trilhas %u\n", a);
     printf("novo grafo \n" );
     escreve_grafo(stdout, g);
-
+    
     destroi_grafo(g);
     return 0;
 }
