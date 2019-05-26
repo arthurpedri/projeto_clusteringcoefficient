@@ -438,6 +438,7 @@ while (pai->lista != NULL) {
 unsigned int cobertura_por_trilhas(grafo g, vertice **cobertura[]){
   unsigned int k = vertices_impares(g);
   listav **aux = malloc(sizeof(struct listav)*k*3);
+  *cobertura = malloc(sizeof(vertice**)*k);
   //listav aux[g->tamanho];
   listav *cicloEncontrado;
   int trilhasExtras = 0;
@@ -487,10 +488,10 @@ unsigned int cobertura_por_trilhas(grafo g, vertice **cobertura[]){
           cicloEncontrado = encontra_ciclo(i);
           aux[trilhasExtras] = naLista(cicloEncontrado, trilhaPrincipal); // retorna vertice do encontra_ciclo em comum com trilhaPrincipal
           // printf("aux %s\n", aux[trilhasExtras]->vertice->nome);
-          for (listav *p = cicloEncontrado ; p != NULL; p = p->prox) {
-            printf("[nome %s]", p->vertice->nome);
-          }
-          printf("\n" );
+          // for (listav *p = cicloEncontrado ; p != NULL; p = p->prox) {
+          //   printf("[nome %s]", p->vertice->nome);
+          // }
+          // printf("\n" );
           if(aux[trilhasExtras]){
               listav *comum_principal = trilhaPrincipal; // vertice trilhaPrincipal em comum_principal com trilha
               while (strcmp(comum_principal->vertice->nome, aux[trilhasExtras]->vertice->nome) != 0) { // nao deve dar loop infinito, mas cuidado
@@ -513,7 +514,6 @@ unsigned int cobertura_por_trilhas(grafo g, vertice **cobertura[]){
                 }
                 // volta no começo da fila e vai até o vertice em comum deles
 
-                // printf("aaaaaaaaaaaaaaaaaaaaaaa comum %s\n",cicloEncontrado->vertice->nome );
               for(cicloA = cicloEncontrado->prox; (aux[trilhasExtras] != cicloA); cicloA = proximo){
                   proximo = cicloA->prox;
                   cicloA->prox= continuacao;
@@ -529,8 +529,67 @@ unsigned int cobertura_por_trilhas(grafo g, vertice **cobertura[]){
           }
       }
 
-  }
+    }
+    // int falta = trilhasExtras;
+//     while(falta){
+//       for(int i = 0 ; i <= trilhasExtras ; i++){
+//         listav *ciclo_restante = naLista(aux[i],trilhaPrincipal);
+//         if (ciclo_restante) {
+//           listav *comum_principal = trilhaPrincipal; // vertice trilhaPrincipal em comum_principal com trilha
+//           while (strcmp(comum_principal->vertice->nome, ciclo_restante->vertice->nome) != 0) { // nao deve dar loop infinito, mas cuidado
+//               comum_principal = comum_principal->prox;
+//           }
+//           listav *continuacao = comum_principal->prox; // e
+//           listav *comeco = comum_principal;//d na trilha principal
+//
+//           listav *cicloA = ciclo_restante;//d na trilha exta
+//           listav *proximo = ciclo_restante->prox;
+//           //inverte a fila até o final
+//           while(proximo != NULL){
+//               proximo = cicloA->prox;
+//               cicloA->prox = continuacao;
+//               continuacao = cicloA;
+//               cicloA = proximo;
+//             }
+//             // volta no começo da fila e vai até o vertice em comum deles
+//           for(cicloA = aux[i]->prox; (ciclo_restante != cicloA); cicloA = proximo){
+//               proximo = cicloA->prox;
+//               cicloA->prox= continuacao;
+//               continuacao =cicloA;
+//           }
+//           comeco->prox = continuacao;
+//           falta--;
+//         }
+//       }
+//    }
+
+
+
    printf("\n" );
+   for (unsigned int linha = 0 ; linha < k; ++linha) {
+     if (strcmp(trilhaPrincipal->vertice->nome, stringZero )== 0 ){
+       trilhaPrincipal = trilhaPrincipal->prox;
+     }
+     unsigned int coluna = 0;
+     listav *salva= trilhaPrincipal;
+     while(trilhaPrincipal != NULL && (strcmp(trilhaPrincipal->vertice->nome, stringZero )!= 0 )){
+       coluna++;
+     }
+     *(cobertura[linha]) = (vertice*)malloc(sizeof(vertice)*(coluna+1));
+     for (unsigned int op = 0; op < coluna ; op++) {
+       *(cobertura[linha][op]) = salva->vertice;
+       salva= salva->prox;
+
+     }
+    //  while(trilhaPrincipal != NULL && (strcmp(trilhaPrincipal->vertice->nome, stringZero )!= 0 )){
+    //      coluna = 0;
+    //      *(cobertura[linha][coluna]) = trilhaPrincipal->vertice;
+    //      trilhaPrincipal = trilhaPrincipal->prox;
+    //      coluna++;
+    //    }
+    //   *(cobertura[linha][coluna]) = NULL;
+     }
+
   for (listav *i = trilhaPrincipal ; i != NULL; i = i->prox) {
     printf("[nome %s]", i->vertice->nome);
   }
