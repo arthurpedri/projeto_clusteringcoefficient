@@ -299,7 +299,139 @@ grafo escreve_grafo(FILE *output, grafo g){
         v = vprox;
     }
     return(g);
+
 }
+
+
+
+//..............................................................................
+// as funções primeiro_vertice() e proximo_vertice() a seguir
+// implementam um iterador para os vertices de g de maneira que, por
+// exemplo, o laço
+//
+//    for (v=primeiro_vertice(g); v; v=proximo_vertice(v,g)) {
+//        processa(v);
+//        }
+//
+// executa processa(v) uma vez para cada vertice v de g
+//..............................................................................
+
+//------------------------------------------------------------------------------
+// devolve o primeiro vertice de g numa iteração por todos os vertices de g
+//      ou
+//         NULL, se g não tem vertices
+
+vertice primeiro_vertice(grafo g){
+    if(!g->vertices) return NULL;
+
+    return g->vertices;
+}
+
+//------------------------------------------------------------------------------
+// devolve o vertice seguinte a v em g numa iteração por todos os vertices de g
+//      ou
+//         NULL, se v é o último vertice da iteração
+
+vertice proximo_vertice(vertice v, grafo g){
+    if(v->prox == NULL) return NULL;
+
+    return v->prox;
+}
+
+//------------------------------------------------------------------------------
+// computa um emparelhamento de tamanho máximo no grafo bipartido g e devolve o
+// tamanho (número de arestas) do emparelhamento computado
+
+unsigned int emparelha(grafo g);
+
+//------------------------------------------------------------------------------
+// devolve
+//         NULL se v é descoberto pelo emparelhamento M,
+//      ou
+//         o par de v no emparelhamento M,
+//         isto é,
+//         a outra ponta da aresta de M que cobre v, caso contrário,
+//
+// onde M é
+//         o emparelhamento computado pela última execução de emparelha(g),
+//       ou
+//         o emparelhamento vazio, se emparelha(g) não foi executado
+
+vertice par(vertice v);
+//------------------------------------------------------------------------------
+
+/*
+EmparelhamentoMaximo(g){
+    M = 0
+    para cada v de V(g)
+        se v não é coberto por M
+            P = CaminhoAumentante (G,M,v)
+            Se P é caminho
+                M = M + E(P)
+    return M
+}
+
+CaminhoAumentante(G,M,v){
+    T = ({V}, 0)
+    P = {v}
+    Enquanto vizinhancaG(P) - V(T) != 0
+        w = um vértice de vizinhancaG(P) - V(T)
+        u = um vizinho de w em T
+        acrescente {u,w} a T
+        se w não é coberto por M
+            Devolva vTw
+        Senão
+            Acrescente a T a aresta {w,t} que cobre w
+            acrescente t a P
+    Devolva P
+}
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /*  int agrupamento(vertice v, int *triades_totais);
  *  Conta o coeficiente de agrupamento de um vertice para todos os seus vizinhos.
